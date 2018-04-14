@@ -1,0 +1,106 @@
+grammar LuaTable
+  rule luaobj
+    space value space {
+      def to_ruby
+        value.to_ruby
+      end
+    }
+  end
+
+  rule value
+    nil / float / number / string / table / boolean
+  end
+
+  rule nil
+    'nil' {
+      def to_ruby
+        nil
+      end
+    }
+  end
+
+  rule table
+    '{' space elementses:element* space '}' {
+      def to_ruby(*args)
+        temparray = elementses.elements.map { |x| x.to_ruby }
+        return LuaTableParser.splash_array(temparray)        
+      end
+    }
+  end
+
+  rule element
+    space elementv space (',' &element / ','? !element) {
+      def to_ruby
+        elementv.to_ruby
+      end
+    }
+  end
+
+  rule elementv
+    key space '=' space value {
+      def to_ruby
+        hsh = { key.to_ruby => value.to_ruby }
+        def hsh.intermediate_hash?
+          true
+        end
+        hsh
+      end
+    }
+    /
+    value
+  end
+
+  rule key
+    word
+    /
+    '[' space value space ']' {
+      def to_ruby
+        value.to_ruby
+      end
+    }
+  end
+
+  rule float
+    [0-9]+ '.' [0-9]+ {
+      def to_ruby
+        text_value.to_f
+      end
+    }
+  end
+
+  rule number
+    [0-9]+ {
+      def to_ruby
+        text_value.to_i
+      end
+    }
+  end
+
+  rule string
+    '"' (!'"' . / '\"')* '"' {
+      def to_ruby
+        text_value[1..-2]
+      end
+    }
+  end
+
+  rule boolean
+    ('true' / 'false') {
+      def to_ruby
+        text_value == 'true'
+      end
+    }
+  end
+
+  rule word
+    [A-Za-z_]+ {
+      def to_ruby
+        text_value
+      end
+    }
+  end
+
+  rule space  
+     [ \t\r\n]*  
+  end    
+end
