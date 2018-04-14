@@ -6,6 +6,15 @@ base_path = File.expand_path(File.dirname(__FILE__))
 Treetop.load(File.join(base_path, 'lua-table.treetop'))
 
 class LuaTableParser
+  # Parse a Lua table in a given string.
+  #
+  # Example:
+  #   >> LuaTableParser.new.parse_table("{ a = "b" }")
+  #   => { 'a' => 'b' }
+  #
+  # Arguments:
+  #   data: (String)
+  #
   def self.splash_array(ary)
     # Converts an array to a hash or array depending on the
     # contents. The parser returns an array mixed of PODs and Hashes. If
@@ -30,9 +39,7 @@ class LuaTableParser
   end
 
   def parse_table(data)
-    # remove comments and newlines
-    data = data.gsub(/--.*$/,'').gsub('\n','')
-
+    data = data.gsub(/--.*$/,'').gsub('\n','') # remove comments and newlines
     tree = parse(data)
 
     if tree.nil?
